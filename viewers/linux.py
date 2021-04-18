@@ -3,7 +3,7 @@ from typing import List, Iterator, Optional
 
 import utils
 from device import USBDevice, USBDeviceLinux
-from viewer.base import BaseViewer
+from viewers.base import BaseViewer
 
 
 class LinuxViewer(BaseViewer):

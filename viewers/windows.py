@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict, Any, Optional
 
 import utils
 from device import USBDevice, USBDeviceWindows
-from viewer.base import BaseViewer
+from viewers.base import BaseViewer
 
 
 class WindowsViewer(BaseViewer):
