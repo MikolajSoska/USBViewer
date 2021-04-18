@@ -24,9 +24,9 @@ class WindowsViewer:
 
     def get_usb_devices(self) -> List[USBDevice]:
         usb_devices = self.__get_base_device_info()
-        self.__set_usb_registry_info(usb_devices)
-        self.__set_mounted_devices_registry_info(usb_devices)
-        self.__set_portable_devices_registry_info(usb_devices)
+        self.__set_vendor_and_product_ids(usb_devices)
+        self.__set_guids(usb_devices)
+        self.__set_drive_letters(usb_devices)
         self.__set_last_connect_times(usb_devices)
 
         return usb_devices
@@ -60,7 +60,7 @@ class WindowsViewer:
 
         return usb_devices
 
-    def __set_usb_registry_info(self, usb_devices: List[USBDevice]) -> None:
+    def __set_vendor_and_product_ids(self, usb_devices: List[USBDevice]) -> None:
         root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__USB_PATH)
         device_ids = self.__get_registry_keys(root_key)
         device_dict = {}
@@ -81,7 +81,7 @@ class WindowsViewer:
                 device.vendor_id = device_info[0].replace('VID_', '')
                 device.product_id = device_info[1].replace('PID_', '')
 
-    def __set_mounted_devices_registry_info(self, usb_devices: List[USBDevice]) -> None:
+    def __set_guids(self, usb_devices: List[USBDevice]) -> None:
         root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__MOUNTED_DEVICES_PATH)
         registry_values = self.__get_registry_values(root_key)
 
@@ -95,7 +95,7 @@ class WindowsViewer:
                     guid_start_index = key.index('{')
                     device.guid = key[guid_start_index:]
 
-    def __set_portable_devices_registry_info(self, usb_devices: List[USBDevice]) -> None:
+    def __set_drive_letters(self, usb_devices: List[USBDevice]) -> None:
         root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__PORTABLE_DEVICES_PATH)
         registry_keys = self.__get_registry_keys(root_key)
 
