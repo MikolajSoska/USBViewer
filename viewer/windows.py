@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Tuple, Dict, Any, Optional
 
 import utils
-from device import USBDevice
+from device import USBDevice, USBDeviceWindows
 from viewer.base import BaseViewer
 
 
@@ -35,7 +35,7 @@ class WindowsViewer(BaseViewer):
 
         return usb_devices
 
-    def __get_base_device_info(self) -> List[USBDevice]:
+    def __get_base_device_info(self) -> List[USBDeviceWindows]:
         root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__USBSTOR_PATH)
         usbstor_keys = self.__get_registry_keys(root_key)
         usb_devices = []
@@ -59,12 +59,19 @@ class WindowsViewer(BaseViewer):
                 else:
                     parent_prefix_id = device
 
-                usb_device = USBDevice(vendor, product, version, serial_number, friendly_name, parent_prefix_id)
+                usb_device = USBDeviceWindows(
+                    usbstor_vendor=vendor,
+                    usbstor_product=product,
+                    version=version,
+                    serial_number=serial_number,
+                    friendly_name=friendly_name,
+                    parent_prefix_id=parent_prefix_id
+                )
                 usb_devices.append(usb_device)
 
         return usb_devices
 
-    def __set_vendor_and_product_ids(self, usb_devices: List[USBDevice]) -> None:
+    def __set_vendor_and_product_ids(self, usb_devices: List[USBDeviceWindows]) -> None:
         root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__USB_PATH)
         device_ids = self.__get_registry_keys(root_key)
         device_dict = {}
@@ -85,7 +92,7 @@ class WindowsViewer(BaseViewer):
                 device.vendor_id = device_info[0].replace('VID_', '')
                 device.product_id = device_info[1].replace('PID_', '')
 
-    def __set_guids(self, usb_devices: List[USBDevice]) -> None:
+    def __set_guids(self, usb_devices: List[USBDeviceWindows]) -> None:
         root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__MOUNTED_DEVICES_PATH)
         registry_values = self.__get_registry_values(root_key)
 
@@ -99,7 +106,7 @@ class WindowsViewer(BaseViewer):
                     guid_start_index = key.index('{')
                     device.guid = key[guid_start_index:]
 
-    def __set_drive_letters(self, usb_devices: List[USBDevice]) -> None:
+    def __set_drive_letters(self, usb_devices: List[USBDeviceWindows]) -> None:
         root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__PORTABLE_DEVICES_PATH)
         registry_keys = self.__get_registry_keys(root_key)
 
@@ -112,7 +119,7 @@ class WindowsViewer(BaseViewer):
                 device.drive_letter = values['FriendlyName']
 
     @staticmethod
-    def __set_first_connect_dates(usb_devices: List[USBDevice]) -> None:
+    def __set_first_connect_dates(usb_devices: List[USBDeviceWindows]) -> None:
         time_dict = {}
         for log_path in glob.glob(r'C:\Windows\inf\setupapi.dev*.log'):  # There could be multiple files in system
             for section in utils.parse_windows_log_file(log_path):
@@ -128,7 +135,7 @@ class WindowsViewer(BaseViewer):
                 if device.serial_number in key:
                     device.first_connect_date = install_time
 
-    def __set_last_connect_dates(self, usb_devices: List[USBDevice]) -> None:
+    def __set_last_connect_dates(self, usb_devices: List[USBDeviceWindows]) -> None:
         root_key = winreg.OpenKey(self.__user_registry, WindowsViewer.__MOUNT_POINTS_PATH)
         guids = self.__get_registry_keys(root_key)
 
@@ -142,7 +149,7 @@ class WindowsViewer(BaseViewer):
                 device.last_connect_date = datetime.fromtimestamp(timestamp)
 
     @staticmethod
-    def __set_devices_info(usb_devices: List[USBDevice]) -> None:
+    def __set_devices_info(usb_devices: List[USBDeviceWindows]) -> None:
         for device in usb_devices:
             if device.vendor_id is not None and device.product_id is not None:
                 vendor_name, product_description = utils.get_device_info_from_web(device.vendor_id, device.product_id)
