@@ -16,7 +16,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=requirements,
     python_requires='>=3.7',
-    url='https://github.com/MikolajSoska/usb-viewer',
+    url='https://github.com/MikolajSoska/USBViewer',
     author='Mikołaj Soska',
     author_email='mikolaj.soska1@gmail.com',
     description='Forensic tool for viewing USB devices history and details.',
