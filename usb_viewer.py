@@ -11,6 +11,9 @@ class WindowsViewer:
     def __init__(self):
         self.__registry = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
 
+    def __del__(self):
+        self.__registry.Close()
+
     def get_usb_devices(self) -> List[USBStorage]:
         usb_devices = self.__get_base_device_info()
         vendor_product_dict = self.__get_vendor_and_product_id()
