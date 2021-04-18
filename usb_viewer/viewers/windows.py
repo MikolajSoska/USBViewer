@@ -4,9 +4,9 @@ from collections import defaultdict
 from datetime import datetime
 from typing import List, Tuple, Dict, Any, Optional
 
-import utils
-from device import USBDevice, USBDeviceWindows
-from viewers.base import BaseViewer
+from usb_viewer import utils
+from usb_viewer.device import USBDevice, USBDeviceWindows
+from usb_viewer.viewers.base import BaseViewer
 
 
 class WindowsViewer(BaseViewer):

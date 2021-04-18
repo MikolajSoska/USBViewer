@@ -1,17 +1,17 @@
 import platform
 from typing import Optional
 
-from viewers.base import BaseViewer
+from usb_viewer.viewers.base import BaseViewer
 
 
 def get_usb_viewer() -> Optional[BaseViewer]:
     if platform.system() == 'Windows':
-        from viewers.windows import WindowsViewer  # To prevent from importing 'winreg' in Linux
+        from usb_viewer.viewers.windows import WindowsViewer  # To prevent from importing 'winreg' in Linux
         print('Windows system detected.')
         return WindowsViewer()
     elif platform.system() == 'Linux':
         print('Linux system detected.')
-        from viewers.linux import LinuxViewer
+        from usb_viewer.viewers.linux import LinuxViewer
         return LinuxViewer()
     else:
         print(f'Script doesn\'t support system: {platform.system()}.')

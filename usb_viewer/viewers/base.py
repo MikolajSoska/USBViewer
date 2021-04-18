@@ -1,8 +1,8 @@
 import abc
 from typing import List
 
-import utils
-from device import USBDevice
+from usb_viewer import utils
+from usb_viewer.device import USBDevice
 
 
 class BaseViewer(abc.ABC):

@@ -4,9 +4,9 @@ import platform
 from datetime import datetime
 from typing import List, Tuple, Iterator, Optional
 
-import utils
-from device import USBDevice, USBDeviceLinux
-from viewers.base import BaseViewer
+from usb_viewer import utils
+from usb_viewer.device import USBDevice, USBDeviceLinux
+from usb_viewer.viewers.base import BaseViewer
 
 
 class LinuxViewer(BaseViewer):
