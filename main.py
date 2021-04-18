@@ -1,4 +1,4 @@
-from usb_viewer import WindowsViewer
+from viewer.windows import WindowsViewer
 
 
 def main():

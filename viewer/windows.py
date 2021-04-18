@@ -6,9 +6,10 @@ from typing import List, Tuple, Dict, Any, Optional
 
 import utils
 from device import USBDevice
+from viewer.base import BaseViewer
 
 
-class WindowsViewer:
+class WindowsViewer(BaseViewer):
     __USBSTOR_PATH = r'SYSTEM\CurrentControlSet\Enum\USBSTOR'
     __USB_PATH = r'SYSTEM\CurrentControlSet\Enum\USB'
     __MOUNTED_DEVICES_PATH = r'SYSTEM\MountedDevices'
