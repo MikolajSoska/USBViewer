@@ -37,6 +37,7 @@ class LinuxViewer(BaseViewer):
             device.syslog_manufacturer = self.__get_device_info_from_section(section, 'Manufacturer:')
             device.serial_number = self.__get_device_info_from_section(section, 'SerialNumber:')
             device.friendly_name = self.__get_device_info_from_section(section, 'Direct-Access')
+            device.device_size = self.__get_device_size(section)
 
             usb_devices.append(device)
 
@@ -80,6 +81,14 @@ class LinuxViewer(BaseViewer):
             if info_type in line:
                 start_index = line.index(info_type)
                 return line[start_index + len(info_type):].split(maxsplit=1)[-1].strip()
+        return None
+
+    @staticmethod
+    def __get_device_size(section: List[str]) -> Optional[str]:
+        for line in section:
+            if 'logical blocks' in line:
+                index_start = line.rindex(']')
+                return line[index_start + 1:].strip()
         return None
 
     @staticmethod
