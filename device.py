@@ -51,10 +51,14 @@ class USBDeviceWindows(USBDevice):
 
 @dataclass(init=True, repr=True, eq=False)
 class USBDeviceLinux(USBDevice):
+    syslog_manufacturer: Optional[str] = None
+    syslog_product: Optional[str] = None
     device_size: Optional[str] = None
 
     def get_details(self) -> str:
         details = super().get_details()
+        details += f'\t- SYSLOG Manufacturer: {self.syslog_manufacturer}\n'
+        details += f'\t- SYSLOG Product: {self.syslog_product}\n'
         details += f'\t- Device size: {self.device_size}\n'
 
         return details
