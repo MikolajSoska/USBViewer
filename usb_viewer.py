@@ -1,3 +1,4 @@
+import glob
 import winreg
 from collections import defaultdict
 from datetime import datetime
@@ -112,13 +113,14 @@ class WindowsViewer:
     @staticmethod
     def __set_first_connect_dates(usb_devices: List[USBDevice]) -> None:
         time_dict = {}
-        for section in utils.parse_windows_log_file(r'C:\Windows\inf\setupapi.dev.log'):
-            if 'Device Install ' in section[0] and 'SUCCESS' in section[-1]:
-                install_time = section[-2].split()[-2:]  # Get only date and time from string
-                install_time = ' '.join(install_time)
-                install_time = install_time.split('.')[0]  # Remove milliseconds
-                install_time = datetime.strptime(install_time, '%Y/%m/%d %H:%M:%S')
-                time_dict[section[0]] = install_time
+        for log_path in glob.glob(r'C:\Windows\inf\setupapi.dev*.log'):  # There could be multiple files in system
+            for section in utils.parse_windows_log_file(log_path):
+                if 'Device Install ' in section[0] and 'SUCCESS' in section[-1]:
+                    install_time = section[-2].split()[-2:]  # Get only date and time from string
+                    install_time = ' '.join(install_time)
+                    install_time = install_time.split('.')[0]  # Remove milliseconds
+                    install_time = datetime.strptime(install_time, '%Y/%m/%d %H:%M:%S')
+                    time_dict[section[0]] = install_time
 
         for device in usb_devices:
             for key, install_time in time_dict.items():
