@@ -19,4 +19,4 @@ Script automatically performs operations for detected OS.
 ### Running
 
 - if whl is installed: `python -m usb_viewer`
-- else: `python usb_viewer.__main__`
+- else: `python usb_viewer/__main__.py`
