@@ -47,3 +47,14 @@ class USBDeviceWindows(USBDevice):
         details += f'\t- Parent Prefix ID: {self.parent_prefix_id}\n'
 
         return details
+
+
+@dataclass(init=True, repr=True, eq=False)
+class USBDeviceLinux(USBDevice):
+    device_size: Optional[str] = None
+
+    def get_details(self) -> str:
+        details = super().get_details()
+        details += f'\t- Device size: {self.device_size}\n'
+
+        return details
