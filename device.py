@@ -15,4 +15,5 @@ class USBDevice:
     product_id: Optional[str] = None
     guid: Optional[str] = None
     drive_letter: Optional[str] = None
-    last_connect_time: Optional[datetime] = None
+    first_connect_date: Optional[datetime] = None
+    last_connect_date: Optional[datetime] = None

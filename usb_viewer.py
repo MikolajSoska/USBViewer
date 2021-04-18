@@ -27,7 +27,8 @@ class WindowsViewer:
         self.__set_vendor_and_product_ids(usb_devices)
         self.__set_guids(usb_devices)
         self.__set_drive_letters(usb_devices)
-        self.__set_last_connect_times(usb_devices)
+        self.__set_first_connect_dates(usb_devices)
+        self.__set_last_connect_dates(usb_devices)
 
         return usb_devices
 
@@ -107,7 +108,23 @@ class WindowsViewer:
                 values = self.__get_registry_values(device_key)
                 device.drive_letter = values['FriendlyName']
 
-    def __set_last_connect_times(self, usb_devices: List[USBDevice]) -> None:
+    @staticmethod
+    def __set_first_connect_dates(usb_devices: List[USBDevice]) -> None:
+        time_dict = {}
+        for section in utils.parse_windows_log_file(r'C:\Windows\inf\setupapi.dev.log'):
+            if 'Device Install ' in section[0] and 'SUCCESS' in section[-1]:
+                install_time = section[-2].split()[-2:]  # Get only date and time from string
+                install_time = ' '.join(install_time)
+                install_time = install_time.split('.')[0]  # Remove milliseconds
+                install_time = datetime.strptime(install_time, '%Y/%m/%d %H:%M:%S')
+                time_dict[section[0]] = install_time
+
+        for device in usb_devices:
+            for key, install_time in time_dict.items():
+                if device.serial_number in key:
+                    device.first_connect_date = install_time
+
+    def __set_last_connect_dates(self, usb_devices: List[USBDevice]) -> None:
         root_key = winreg.OpenKey(self.__user_registry, WindowsViewer.__MOUNT_POINTS_PATH)
         guids = self.__get_registry_keys(root_key)
 
@@ -118,7 +135,7 @@ class WindowsViewer:
 
                 device_key = winreg.OpenKey(self.__user_registry, rf'{WindowsViewer.__MOUNT_POINTS_PATH}\{guid}')
                 timestamp = self.__get_registry_timestamp(device_key)
-                device.last_connect_time = datetime.fromtimestamp(timestamp)
+                device.last_connect_date = datetime.fromtimestamp(timestamp)
 
     @staticmethod
     def __parse_device_name(device_name: str) -> Optional[Tuple[str, str, str]]:
