@@ -45,8 +45,12 @@ class WindowsViewer:
                 device_values = self.__get_registry_values(device_key)
                 serial_number = device.split('&')[0]
                 friendly_name = device_values['FriendlyName']
+                if 'ParentPrefixId' in device_values:
+                    parent_prefix_id = device_values['ParentPrefixId']
+                else:
+                    parent_prefix_id = device
 
-                usb_device = USBStorage(vendor, product, version, serial_number, friendly_name)
+                usb_device = USBStorage(vendor, product, version, serial_number, friendly_name, parent_prefix_id)
                 usb_devices.append(usb_device)
 
         return usb_devices

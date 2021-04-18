@@ -9,5 +9,6 @@ class USBStorage:
     version: str
     serial_number: str
     friendly_name: str
+    parent_prefix_id: str
     vendor_id: Optional[str] = None
     product_id: Optional[str] = None
