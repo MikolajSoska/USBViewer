@@ -18,14 +18,7 @@ class WindowsViewer:
 
     def get_usb_devices(self) -> List[USBStorage]:
         usb_devices = self.__get_base_device_info()
-        vendor_product_dict = self.__get_usb_registry_info()
-
-        for device in usb_devices:
-            if device.serial_number in vendor_product_dict:
-                vendor_id, product_id = vendor_product_dict[device.serial_number]
-                device.vendor_id = vendor_id
-                device.product_id = product_id
-
+        self.__set_usb_registry_info(usb_devices)
         self.__set_mounted_devices_registry_info(usb_devices)
 
         return usb_devices
@@ -59,7 +52,7 @@ class WindowsViewer:
 
         return usb_devices
 
-    def __get_usb_registry_info(self) -> Dict[str, Tuple[str, str]]:
+    def __set_usb_registry_info(self, usb_devices: List[USBStorage]) -> None:
         root_key = winreg.OpenKey(self.__registry, WindowsViewer.__USB_PATH)
         device_ids = self.__get_registry_keys(root_key)
         device_dict = {}
@@ -67,15 +60,18 @@ class WindowsViewer:
             if 'VID' not in device_id or 'PID' not in device_id:
                 continue
 
-            device_info = device_id.split('&')
-            vendor_id = device_info[0].replace('VID_', '')
-            product_id = device_info[1].replace('PID_', '')
-
             device_key = winreg.OpenKey(self.__registry, rf'{WindowsViewer.__USB_PATH}\{device_id}')
             serial_number = self.__get_registry_keys(device_key)[0]
-            device_dict[serial_number] = (vendor_id, product_id)
+            device_dict[serial_number] = device_id
 
-        return device_dict
+        for device in usb_devices:
+            for serial_number, device_id in device_dict.items():
+                if device.serial_number != serial_number:
+                    continue
+
+                device_info = device_id.split('&')
+                device.vendor_id = device_info[0].replace('VID_', '')
+                device.product_id = device_info[1].replace('PID_', '')
 
     def __set_mounted_devices_registry_info(self, usb_devices: List[USBStorage]) -> None:
         root_key = winreg.OpenKey(self.__registry, WindowsViewer.__MOUNTED_DEVICES_PATH)
