@@ -14,6 +14,12 @@ class LinuxViewer(BaseViewer):
         self.__hostname = platform.node()
 
     def get_usb_devices(self) -> List[USBDevice]:
+        usb_devices = self.__get_base_device_info()
+        self._set_devices_info(usb_devices)
+
+        return usb_devices
+
+    def __get_base_device_info(self) -> List[USBDeviceLinux]:
         usb_devices = []
         for section, year in self.__get_log_sections():
             serial_number = self.__get_device_info_from_section(section, 'SerialNumber:')
@@ -38,7 +44,6 @@ class LinuxViewer(BaseViewer):
             device.serial_number = self.__get_device_info_from_section(section, 'SerialNumber:')
             device.friendly_name = self.__get_device_info_from_section(section, 'Direct-Access')
             device.device_size = self.__get_device_size(section)
-
             usb_devices.append(device)
 
         return usb_devices

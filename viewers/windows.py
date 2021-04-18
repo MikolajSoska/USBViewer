@@ -31,7 +31,7 @@ class WindowsViewer(BaseViewer):
         self.__set_drive_letters(usb_devices)
         self.__set_first_connect_dates(usb_devices)
         self.__set_last_connect_dates(usb_devices)
-        self.__set_devices_info(usb_devices)
+        self._set_devices_info(usb_devices)
 
         return usb_devices
 
@@ -147,14 +147,6 @@ class WindowsViewer(BaseViewer):
                 device_key = winreg.OpenKey(self.__user_registry, rf'{WindowsViewer.__MOUNT_POINTS_PATH}\{guid}')
                 timestamp = self.__get_registry_timestamp(device_key)
                 device.last_connect_date = datetime.fromtimestamp(timestamp)
-
-    @staticmethod
-    def __set_devices_info(usb_devices: List[USBDeviceWindows]) -> None:
-        for device in usb_devices:
-            if device.vendor_id is not None and device.product_id is not None:
-                vendor_name, product_description = utils.get_device_info_from_web(device.vendor_id, device.product_id)
-                device.vendor_name = vendor_name
-                device.product_description = product_description
 
     @staticmethod
     def __parse_device_name(device_name: str) -> Optional[Tuple[str, str, str]]:
