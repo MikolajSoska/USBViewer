@@ -7,8 +7,10 @@ from viewers.base import BaseViewer
 def get_usb_viewer() -> Optional[BaseViewer]:
     if platform.system() == 'Windows':
         from viewers.windows import WindowsViewer  # To prevent from importing 'winreg' in Linux
+        print('Windows system detected.')
         return WindowsViewer()
     elif platform.system() == 'Linux':
+        print('Linux system detected.')
         from viewers.linux import LinuxViewer
         return LinuxViewer()
     else:
