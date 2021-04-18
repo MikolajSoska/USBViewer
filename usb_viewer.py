@@ -1,4 +1,5 @@
 import winreg
+from collections import defaultdict
 from datetime import datetime
 from typing import List, Tuple, Dict, Any, Optional
 
@@ -10,6 +11,7 @@ class WindowsViewer:
     __USBSTOR_PATH = r'SYSTEM\CurrentControlSet\Enum\USBSTOR'
     __USB_PATH = r'SYSTEM\CurrentControlSet\Enum\USB'
     __MOUNTED_DEVICES_PATH = r'SYSTEM\MountedDevices'
+    __PORTABLE_DEVICES_PATH = r'SOFTWARE\Microsoft\Windows Portable Devices\Devices'
     __MOUNT_POINTS_PATH = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2'
 
     def __init__(self):
@@ -24,6 +26,7 @@ class WindowsViewer:
         usb_devices = self.__get_base_device_info()
         self.__set_usb_registry_info(usb_devices)
         self.__set_mounted_devices_registry_info(usb_devices)
+        self.__set_portable_devices_registry_info(usb_devices)
         self.__set_last_connect_times(usb_devices)
 
         return usb_devices
@@ -91,9 +94,18 @@ class WindowsViewer:
                 if r'\Volume' in key:
                     guid_start_index = key.index('{')
                     device.guid = key[guid_start_index:]
-                elif r'\Dos' in key:
-                    letter_start_index = key.rindex('\\')
-                    device.drive_letter = key[letter_start_index + 1:]
+
+    def __set_portable_devices_registry_info(self, usb_devices: List[USBDevice]) -> None:
+        root_key = winreg.OpenKey(self.__machine_registry, WindowsViewer.__PORTABLE_DEVICES_PATH)
+        registry_keys = self.__get_registry_keys(root_key)
+
+        for device in usb_devices:
+            for key in registry_keys:
+                if device.parent_prefix_id not in key:
+                    continue
+                device_key = winreg.OpenKey(self.__machine_registry, rf'{WindowsViewer.__PORTABLE_DEVICES_PATH}\{key}')
+                values = self.__get_registry_values(device_key)
+                device.drive_letter = values['FriendlyName']
 
     def __set_last_connect_times(self, usb_devices: List[USBDevice]) -> None:
         root_key = winreg.OpenKey(self.__user_registry, WindowsViewer.__MOUNT_POINTS_PATH)
@@ -131,7 +143,7 @@ class WindowsViewer:
     def __get_registry_values(root_key: winreg.HKEYType) -> Dict[str, Any]:
         key_info = winreg.QueryInfoKey(root_key)
         values_length = key_info[1]
-        values_dict = {}
+        values_dict = defaultdict(lambda: None)
 
         for index in range(values_length):
             name, value, _ = winreg.EnumValue(root_key, index)
