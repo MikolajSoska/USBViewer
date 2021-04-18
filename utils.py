@@ -1,4 +1,5 @@
-from typing import List, Tuple, Optional, Iterator
+import gzip
+from typing import List, Tuple, Optional, Iterator, IO
 
 import bs4
 import requests
@@ -69,3 +70,28 @@ def get_device_info_from_web(vendor_id: str, product_id: str, max_attempts: int 
 
     else:
         return get_device_info_from_web(vendor_id, product_id, max_attempts - 1)
+
+
+def open_linux_log_file(filepath: str) -> IO:
+    if filepath.endswith('.gz'):
+        return gzip.open(filepath, 'rt')
+    else:
+        return open(filepath, 'r')
+
+
+def parse_linux_log_file(filepath: str) -> Iterator[List[str]]:
+    with open_linux_log_file(filepath) as log_file:
+        section = []
+        for line in log_file:
+            if 'New USB device found' in line:
+                if len(section) == 0:
+                    section.append(line)
+                    continue
+                else:  # Previous section wasn't USB device
+                    section.clear()
+                    section.append(line)
+
+            if len(section) > 0 and 'Mounted /dev/sd' in line:
+                section.append(line)
+                yield section
+                section.clear()
