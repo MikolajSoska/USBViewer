@@ -91,7 +91,8 @@ def parse_linux_log_file(filepath: str) -> Iterator[List[str]]:
                     section.clear()
                     section.append(line)
 
-            if len(section) > 0 and 'Mounted /dev/sd' in line:
+            if len(section) > 0:
                 section.append(line)
-                yield section
-                section.clear()
+                if 'Mounted /dev/sd' in line:
+                    yield section
+                    section.clear()
