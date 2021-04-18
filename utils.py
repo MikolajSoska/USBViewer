@@ -16,7 +16,7 @@ def convert_windows_time_to_unix(windows_timestamp: int) -> int:
 
 
 def parse_windows_log_file(filepath: str):
-    with open(filepath) as log_file:
+    with open(filepath, 'r') as log_file:
         log_section = []
         for line in log_file:
 
