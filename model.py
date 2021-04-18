@@ -12,3 +12,5 @@ class USBStorage:
     parent_prefix_id: str
     vendor_id: Optional[str] = None
     product_id: Optional[str] = None
+    guid: Optional[str] = None
+    drive_letter: Optional[str] = None

@@ -1,12 +1,14 @@
 import winreg
 from typing import List, Tuple, Dict, Any, Optional
 
+import utils
 from model import USBStorage
 
 
 class WindowsViewer:
     __USBSTOR_PATH = r'SYSTEM\CurrentControlSet\Enum\USBSTOR'
     __USB_PATH = r'SYSTEM\CurrentControlSet\Enum\USB'
+    __MOUNTED_DEVICES_PATH = r'SYSTEM\MountedDevices'
 
     def __init__(self):
         self.__registry = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
@@ -16,13 +18,15 @@ class WindowsViewer:
 
     def get_usb_devices(self) -> List[USBStorage]:
         usb_devices = self.__get_base_device_info()
-        vendor_product_dict = self.__get_vendor_and_product_id()
+        vendor_product_dict = self.__get_usb_registry_info()
 
         for device in usb_devices:
             if device.serial_number in vendor_product_dict:
                 vendor_id, product_id = vendor_product_dict[device.serial_number]
                 device.vendor_id = vendor_id
                 device.product_id = product_id
+
+        self.__set_mounted_devices_registry_info(usb_devices)
 
         return usb_devices
 
@@ -55,7 +59,7 @@ class WindowsViewer:
 
         return usb_devices
 
-    def __get_vendor_and_product_id(self) -> Dict[str, Tuple[str, str]]:
+    def __get_usb_registry_info(self) -> Dict[str, Tuple[str, str]]:
         root_key = winreg.OpenKey(self.__registry, WindowsViewer.__USB_PATH)
         device_ids = self.__get_registry_keys(root_key)
         device_dict = {}
@@ -72,6 +76,23 @@ class WindowsViewer:
             device_dict[serial_number] = (vendor_id, product_id)
 
         return device_dict
+
+    def __set_mounted_devices_registry_info(self, usb_devices: List[USBStorage]) -> None:
+        root_key = winreg.OpenKey(self.__registry, WindowsViewer.__MOUNTED_DEVICES_PATH)
+        registry_values = self.__get_registry_values(root_key)
+
+        for device in usb_devices:
+            for key, value in registry_values.items():
+                value = utils.convert_binary_to_ascii_string(value)
+                if device.parent_prefix_id not in value:
+                    continue
+
+                if r'\Volume' in key:
+                    guid_start_index = key.index('{')
+                    device.guid = key[guid_start_index:]
+                elif r'\Dos' in key:
+                    letter_start_index = key.rindex('\\')
+                    device.drive_letter = key[letter_start_index + 1:]
 
     @staticmethod
     def __parse_device_name(device_name: str) -> Optional[Tuple[str, str, str]]:
