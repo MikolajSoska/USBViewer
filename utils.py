@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import List, Tuple, Optional, Iterator
 
 import bs4
 import requests
@@ -15,7 +15,7 @@ def convert_windows_time_to_unix(windows_timestamp: int) -> int:
     return int(windows_timestamp / windows_tick - seconds_to_unix_epoch)
 
 
-def parse_windows_log_file(filepath: str):
+def parse_windows_log_file(filepath: str) -> Iterator[List[str]]:
     with open(filepath, 'r') as log_file:
         log_section = []
         for line in log_file:
