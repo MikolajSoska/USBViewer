@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
 
 
@@ -14,3 +15,4 @@ class USBDevice:
     product_id: Optional[str] = None
     guid: Optional[str] = None
     drive_letter: Optional[str] = None
+    last_connect_time: Optional[datetime] = None
