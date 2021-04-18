@@ -2,7 +2,7 @@ import winreg
 from typing import List, Tuple, Dict, Any, Optional
 
 import utils
-from model import USBStorage
+from device import USBDevice
 
 
 class WindowsViewer:
@@ -16,14 +16,14 @@ class WindowsViewer:
     def __del__(self):
         self.__registry.Close()
 
-    def get_usb_devices(self) -> List[USBStorage]:
+    def get_usb_devices(self) -> List[USBDevice]:
         usb_devices = self.__get_base_device_info()
         self.__set_usb_registry_info(usb_devices)
         self.__set_mounted_devices_registry_info(usb_devices)
 
         return usb_devices
 
-    def __get_base_device_info(self) -> List[USBStorage]:
+    def __get_base_device_info(self) -> List[USBDevice]:
         root_key = winreg.OpenKey(self.__registry, WindowsViewer.__USBSTOR_PATH)
         usbstor_keys = self.__get_registry_keys(root_key)
         usb_devices = []
@@ -47,12 +47,12 @@ class WindowsViewer:
                 else:
                     parent_prefix_id = device
 
-                usb_device = USBStorage(vendor, product, version, serial_number, friendly_name, parent_prefix_id)
+                usb_device = USBDevice(vendor, product, version, serial_number, friendly_name, parent_prefix_id)
                 usb_devices.append(usb_device)
 
         return usb_devices
 
-    def __set_usb_registry_info(self, usb_devices: List[USBStorage]) -> None:
+    def __set_usb_registry_info(self, usb_devices: List[USBDevice]) -> None:
         root_key = winreg.OpenKey(self.__registry, WindowsViewer.__USB_PATH)
         device_ids = self.__get_registry_keys(root_key)
         device_dict = {}
@@ -73,7 +73,7 @@ class WindowsViewer:
                 device.vendor_id = device_info[0].replace('VID_', '')
                 device.product_id = device_info[1].replace('PID_', '')
 
-    def __set_mounted_devices_registry_info(self, usb_devices: List[USBStorage]) -> None:
+    def __set_mounted_devices_registry_info(self, usb_devices: List[USBDevice]) -> None:
         root_key = winreg.OpenKey(self.__registry, WindowsViewer.__MOUNTED_DEVICES_PATH)
         registry_values = self.__get_registry_values(root_key)
 

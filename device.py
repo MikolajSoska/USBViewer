@@ -3,7 +3,7 @@ from typing import Optional
 
 
 @dataclass(init=True, repr=True, eq=False)
-class USBStorage:
+class USBDevice:
     vendor: str
     product: str
     version: str
